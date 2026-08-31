@@ -1,0 +1,25 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+.ipynb_checkpoints/
+
+.vscode/
+
+.DS_Store
+
+*.log
+
+# Secrets
+.env
+
+# Large ML files
+*.h5
+*.keras
+*.pkl
+*.joblib
+
+# Streamlit
+.streamlit/secrets.toml
