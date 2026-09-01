@@ -1,10 +1,15 @@
 from pathlib import Path
+import os
 import pickle
 
 import numpy as np
 
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.sequence import pad_sequences
+# USE PYTORCH BACKEND 
+
+os.environ["KERAS_BACKEND"] = "torch"
+
+from keras.models import load_model
+from keras.utils import pad_sequences
 
 
 # ============================================================
