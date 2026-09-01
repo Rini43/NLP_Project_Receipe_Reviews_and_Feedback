@@ -84,3 +84,16 @@ NLP_Project_Receipe_Reviews_and_Feedback/
 └── data/
     └── Recipe Reviews and User Feedback Dataset.csv
 
+Package	                            Why it belongs
+
+streamlit	                        Runs your web application
+numpy	                            Required by ML/deep-learning stack
+pandas	                            Used in your notebook/data processing
+scikit-learn	                    Used by your ML pipeline/model artifacts
+joblib	                            Used for serialized ML objects
+keras	                            Loads your .keras LSTM model
+torch	                            Your Keras configuration uses the PyTorch backend
+nltk	                            Used by your NLP preprocessing
+matplotlib	                        Notebook/EDA
+seaborn	                            Notebook/EDA
+
