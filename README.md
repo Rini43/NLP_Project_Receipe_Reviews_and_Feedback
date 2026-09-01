@@ -647,6 +647,23 @@ Overall, the project provides a practical demonstration of how NLP and machine l
 
 ---
 
+## Dataset Citation
+
+### Recipe Reviews and User Feedback Dataset
+
+Ali, A., Matuszewski, S., & Czupyt, J. (2023). *Recipe Reviews and User Feedback* [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C5FG95
+
+**Source:** UCI Machine Learning Repository
+**Dataset ID:** 911
+**Dataset:** Recipe Reviews and User Feedback
+**License:** CC BY 4.0
+**DOI:** 10.24432/C5FG95
+
+The dataset contains **18,182 instances and 15 features**, including recipe information, user information, ratings, engagement metrics, and review text. It is suitable for tasks such as text classification and sentiment analysis.
+
+**Official Dataset:**
+https://archive.ics.uci.edu/dataset/911/recipe+reviews+and+user+feedback+dataset
+
 ## License
 
 This project is intended for educational and academic purposes.
