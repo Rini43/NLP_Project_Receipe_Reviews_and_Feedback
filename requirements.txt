@@ -1,0 +1,86 @@
+# Recipe Reviews & User Feedback - NLP Project
+
+# Production Dependencies
+
+# Python 3.11
+
+# Target: Streamlit Cloud / GitHub Deployment
+
+# ============================================================
+
+# -------------------------
+
+# Web Application
+
+# -------------------------
+
+streamlit==1.49.1
+
+# -------------------------
+
+# Data Processing
+
+# -------------------------
+
+numpy==2.3.2
+pandas==2.3.2
+
+# -------------------------
+
+# Machine Learning
+
+# -------------------------
+
+scikit-learn==1.7.1
+joblib==1.5.1
+
+# -------------------------
+
+# Deep Learning / NLP Model
+
+# -------------------------
+
+keras==3.15.1
+torch==2.8.0
+
+# -------------------------
+
+# Natural Language Processing
+
+# -------------------------
+
+nltk==3.9.1
+
+# -------------------------
+
+# Data Visualization
+
+# -------------------------
+
+matplotlib==3.10.5
+seaborn==0.13.2
+
+NLP_Project_Receipe_Reviews_and_Feedback/
+│
+├── app.py
+├── requirements.txt        ← THIS FILE
+├── README.md
+│
+├── src/
+│   ├── prediction.py
+│   └── preprocessing.py
+│
+├── models/
+│   ├── lstm_model.keras
+│   ├── tokenizer.pkl
+│   ├── label_mapping.pkl
+│   ├── config.pkl
+│   ├── tfidf_vectorizer.pkl
+│   └── recipe_rating_model.pkl
+│
+├── notebooks/
+│   └── NLP_Project.ipynb
+│
+└── data/
+    └── Recipe Reviews and User Feedback Dataset.csv
+
