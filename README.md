@@ -26,6 +26,12 @@ The project implements both traditional machine learning techniques and a deep l
 
 The dataset contains user reviews and feedback associated with recipes. Each record contains information about the recipe, reviewer, review text, ratings, and user engagement.
 
+### Dataset Source
+
+**UCI Machine Learning Repository**
+
+https://archive.ics.uci.edu/dataset/911/recipe+reviews+and+user+feedback+dataset
+
 ### Dataset Size
 
 * Initial Records: **18,182**
