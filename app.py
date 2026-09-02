@@ -21,7 +21,7 @@ st.set_page_config(
 st.title("🍴 Recipe Review Sentiment Analysis")
 
 st.write(
-    "Enter a recipe review below and the trained LSTM model "
+    "Enter a recipe review below and the trained TF-IDF + SVM model "
     "will automatically predict the sentiment."
 )
 
