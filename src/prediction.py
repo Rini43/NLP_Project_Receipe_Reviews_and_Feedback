@@ -1,5 +1,15 @@
 from pathlib import Path
-import joblib
+import os
+import pickle
+
+import numpy as np
+
+# USE PYTORCH BACKEND 
+
+os.environ["KERAS_BACKEND"] = "torch"
+
+from keras.models import load_model
+from keras.utils import pad_sequences
 
 
 # ============================================================
@@ -7,37 +17,58 @@ import joblib
 # ============================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 MODEL_DIR = BASE_DIR / "models"
 
 
 # ============================================================
-# MODEL PATH
+# FILE PATHS
 # ============================================================
 
-MODEL_PATH = MODEL_DIR / "recipe_sentiment_model.pkl"
+MODEL_PATH = MODEL_DIR / "lstm_model.keras"
 
+TOKENIZER_PATH = MODEL_DIR / "tokenizer.pkl"
 
-# ============================================================
-# LABEL MAPPING
-# ============================================================
+LABEL_MAPPING_PATH = MODEL_DIR / "label_mapping.pkl"
 
-LABEL_MAPPING = {
-    0: "Negative",
-    1: "Neutral",
-    2: "Positive"
-}
+CONFIG_PATH = MODEL_DIR / "config.pkl"
 
 
 # ============================================================
-# LOAD MODEL
+# LOAD LSTM MODEL
 # ============================================================
 
-if not MODEL_PATH.exists():
-    raise FileNotFoundError(
-        f"Model file not found: {MODEL_PATH}"
-    )
+model = load_model(MODEL_PATH)
 
-model = joblib.load(MODEL_PATH)
+
+# ============================================================
+# LOAD TOKENIZER
+# ============================================================
+
+with open(TOKENIZER_PATH, "rb") as file:
+
+    tokenizer = pickle.load(file)
+
+
+# ============================================================
+# LOAD LABEL MAPPING
+# ============================================================
+
+with open(LABEL_MAPPING_PATH, "rb") as file:
+
+    id_to_label = pickle.load(file)
+
+
+# ============================================================
+# LOAD MODEL CONFIGURATION
+# ============================================================
+
+with open(CONFIG_PATH, "rb") as file:
+
+    config = pickle.load(file)
+
+
+MAX_LENGTH = config["max_length"]
 
 
 # ============================================================
@@ -45,94 +76,35 @@ model = joblib.load(MODEL_PATH)
 # ============================================================
 
 def predict_rating(review):
-    """
-    Predict sentiment for a recipe review.
 
-    Parameters
-    ----------
-    review : str
-        Recipe review entered by the user.
+    # Convert review to string
+    review = str(review)
 
-    Returns
-    -------
-    prediction : int
-        Predicted class.
+    # Convert text into sequence
+    sequence = tokenizer.texts_to_sequences([review])
 
-    label : str
-        Predicted sentiment.
-    """
+    # Pad sequence
+    padded_sequence = pad_sequences(
+        sequence,
+        maxlen=MAX_LENGTH,
+        padding="post",
+        truncating="post"
+    )
 
-    # --------------------------------------------------------
-    # Validate input
-    # --------------------------------------------------------
-
-    if review is None:
-        raise ValueError(
-            "Review cannot be None."
-        )
-
-    review = str(review).strip()
-
-    if not review:
-        raise ValueError(
-            "Review cannot be empty."
-        )
-
-    # --------------------------------------------------------
-    # Prediction
-    # --------------------------------------------------------
-
-    prediction = model.predict(
-        [review]
+    # Get prediction probabilities
+    probabilities = model.predict(
+        padded_sequence,
+        verbose=0
     )[0]
 
-    prediction = int(prediction)
-
-    # --------------------------------------------------------
-    # Convert prediction to label
-    # --------------------------------------------------------
-
-    label = LABEL_MAPPING.get(
-        prediction,
-        str(prediction)
+    # Get predicted class
+    prediction = int(
+        np.argmax(probabilities)
     )
 
-    # --------------------------------------------------------
-    # Return
-    # --------------------------------------------------------
-
-    return prediction, label
-
-
-# ============================================================
-# TEST
-# ============================================================
-
-if __name__ == "__main__":
-
-    test_review = (
-        "This recipe was delicious and very easy to make!"
+    # Get confidence
+    confidence = float(
+        probabilities[prediction]
     )
 
-    prediction, label = predict_rating(
-        test_review
-    )
-
-    print("=" * 50)
-    print("RECIPE SENTIMENT PREDICTION")
-    print("=" * 50)
-
-    print(
-        "\nReview:",
-        test_review
-    )
-
-    print(
-        "Prediction:",
-        prediction
-    )
-
-    print(
-        "Sentiment:",
-        label
-    )
+    return prediction, confidence
