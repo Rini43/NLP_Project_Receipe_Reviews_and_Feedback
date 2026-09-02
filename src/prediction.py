@@ -1,15 +1,6 @@
 from pathlib import Path
-import os
-import pickle
-
+import joblib
 import numpy as np
-
-# USE PYTORCH BACKEND 
-
-os.environ["KERAS_BACKEND"] = "torch"
-
-from keras.models import load_model
-from keras.utils import pad_sequences
 
 
 # ============================================================
@@ -17,58 +8,38 @@ from keras.utils import pad_sequences
 # ============================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 MODEL_DIR = BASE_DIR / "models"
 
 
 # ============================================================
-# FILE PATHS
+# MODEL PATH
 # ============================================================
 
-MODEL_PATH = MODEL_DIR / "lstm_model.keras"
-
-TOKENIZER_PATH = MODEL_DIR / "tokenizer.pkl"
-
-LABEL_MAPPING_PATH = MODEL_DIR / "label_mapping.pkl"
-
-CONFIG_PATH = MODEL_DIR / "config.pkl"
+MODEL_PATH = MODEL_DIR / "recipe_sentiment_model.pkl"
 
 
 # ============================================================
-# LOAD LSTM MODEL
+# LOAD TF-IDF + SVM PIPELINE
 # ============================================================
 
-model = load_model(MODEL_PATH)
+if not MODEL_PATH.exists():
+    raise FileNotFoundError(
+        f"Model file not found: {MODEL_PATH}"
+    )
 
-
-# ============================================================
-# LOAD TOKENIZER
-# ============================================================
-
-with open(TOKENIZER_PATH, "rb") as file:
-
-    tokenizer = pickle.load(file)
+model = joblib.load(MODEL_PATH)
 
 
 # ============================================================
-# LOAD LABEL MAPPING
+# LABEL MAPPING
 # ============================================================
 
-with open(LABEL_MAPPING_PATH, "rb") as file:
-
-    id_to_label = pickle.load(file)
-
-
-# ============================================================
-# LOAD MODEL CONFIGURATION
-# ============================================================
-
-with open(CONFIG_PATH, "rb") as file:
-
-    config = pickle.load(file)
-
-
-MAX_LENGTH = config["max_length"]
+# Change these labels if your notebook uses a different mapping.
+LABEL_MAPPING = {
+    0: "Negative",
+    1: "Neutral",
+    2: "Positive"
+}
 
 
 # ============================================================
@@ -76,35 +47,86 @@ MAX_LENGTH = config["max_length"]
 # ============================================================
 
 def predict_rating(review):
+    """
+    Predict sentiment for a recipe review.
 
-    # Convert review to string
-    review = str(review)
+    Parameters
+    ----------
+    review : str
+        User's recipe review.
 
-    # Convert text into sequence
-    sequence = tokenizer.texts_to_sequences([review])
+    Returns
+    -------
+    prediction : int
+        Predicted class number.
 
-    # Pad sequence
-    padded_sequence = pad_sequences(
-        sequence,
-        maxlen=MAX_LENGTH,
-        padding="post",
-        truncating="post"
+    label : str
+        Predicted sentiment label.
+
+    confidence : float
+        Prediction confidence as a value between 0 and 1.
+    """
+
+    # Validate input
+    if review is None:
+        raise ValueError("Review cannot be None.")
+
+    review = str(review).strip()
+
+    if not review:
+        raise ValueError("Review cannot be empty.")
+
+
+    # ========================================================
+    # PREDICT
+    # ========================================================
+
+    prediction = int(model.predict([review])[0])
+
+    # Convert class number to label
+    label = LABEL_MAPPING.get(
+        prediction,
+        str(prediction)
     )
 
-    # Get prediction probabilities
-    probabilities = model.predict(
-        padded_sequence,
-        verbose=0
-    )[0]
 
-    # Get predicted class
-    prediction = int(
-        np.argmax(probabilities)
+    # ========================================================
+    # CONFIDENCE
+    # ========================================================
+
+    confidence = None
+
+    if hasattr(model, "predict_proba"):
+        probabilities = model.predict_proba([review])[0]
+
+        confidence = float(
+            np.max(probabilities)
+        )
+
+
+    return prediction, label, confidence
+
+
+# ============================================================
+# TEST
+# ============================================================
+
+if __name__ == "__main__":
+
+    test_review = (
+        "This recipe was delicious and very easy to make!"
     )
 
-    # Get confidence
-    confidence = float(
-        probabilities[prediction]
+    prediction, label, confidence = predict_rating(
+        test_review
     )
 
-    return prediction, confidence
+    print("Review:", test_review)
+    print("Prediction:", prediction)
+    print("Sentiment:", label)
+
+    if confidence is not None:
+        print(
+            "Confidence:",
+            f"{confidence * 100:.2f}%"
+        )
