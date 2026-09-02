@@ -1,6 +1,5 @@
 from pathlib import Path
 import joblib
-import numpy as np
 
 
 # ============================================================
@@ -19,7 +18,18 @@ MODEL_PATH = MODEL_DIR / "recipe_sentiment_model.pkl"
 
 
 # ============================================================
-# LOAD TF-IDF + SVM PIPELINE
+# LABEL MAPPING
+# ============================================================
+
+LABEL_MAPPING = {
+    0: "Negative",
+    1: "Neutral",
+    2: "Positive"
+}
+
+
+# ============================================================
+# LOAD MODEL
 # ============================================================
 
 if not MODEL_PATH.exists():
@@ -28,18 +38,6 @@ if not MODEL_PATH.exists():
     )
 
 model = joblib.load(MODEL_PATH)
-
-
-# ============================================================
-# LABEL MAPPING
-# ============================================================
-
-# Change these labels if your notebook uses a different mapping.
-LABEL_MAPPING = {
-    0: "Negative",
-    1: "Neutral",
-    2: "Positive"
-}
 
 
 # ============================================================
@@ -53,58 +51,57 @@ def predict_rating(review):
     Parameters
     ----------
     review : str
-        User's recipe review.
+        Recipe review entered by the user.
 
     Returns
     -------
     prediction : int
-        Predicted class number.
+        Predicted class.
 
     label : str
-        Predicted sentiment label.
-
-    confidence : float
-        Prediction confidence as a value between 0 and 1.
+        Predicted sentiment.
     """
 
+    # --------------------------------------------------------
     # Validate input
+    # --------------------------------------------------------
+
     if review is None:
-        raise ValueError("Review cannot be None.")
+        raise ValueError(
+            "Review cannot be None."
+        )
 
     review = str(review).strip()
 
     if not review:
-        raise ValueError("Review cannot be empty.")
+        raise ValueError(
+            "Review cannot be empty."
+        )
 
+    # --------------------------------------------------------
+    # Prediction
+    # --------------------------------------------------------
 
-    # ========================================================
-    # PREDICT
-    # ========================================================
+    prediction = model.predict(
+        [review]
+    )[0]
 
-    prediction = int(model.predict([review])[0])
+    prediction = int(prediction)
 
-    # Convert class number to label
+    # --------------------------------------------------------
+    # Convert prediction to label
+    # --------------------------------------------------------
+
     label = LABEL_MAPPING.get(
         prediction,
         str(prediction)
     )
 
+    # --------------------------------------------------------
+    # Return
+    # --------------------------------------------------------
 
-    # ========================================================
-    # CONFIDENCE
-    # ========================================================
-
-    confidence = None
-
-    if hasattr(model, "predict_proba"):
-        probabilities = model.predict_proba([review])[0]
-
-        confidence = float(
-            np.max(probabilities)
-        )
-
-
-    return prediction, label, confidence
+    return prediction, label
 
 
 # ============================================================
@@ -117,16 +114,25 @@ if __name__ == "__main__":
         "This recipe was delicious and very easy to make!"
     )
 
-    prediction, label, confidence = predict_rating(
+    prediction, label = predict_rating(
         test_review
     )
 
-    print("Review:", test_review)
-    print("Prediction:", prediction)
-    print("Sentiment:", label)
+    print("=" * 50)
+    print("RECIPE SENTIMENT PREDICTION")
+    print("=" * 50)
 
-    if confidence is not None:
-        print(
-            "Confidence:",
-            f"{confidence * 100:.2f}%"
-        )
+    print(
+        "\nReview:",
+        test_review
+    )
+
+    print(
+        "Prediction:",
+        prediction
+    )
+
+    print(
+        "Sentiment:",
+        label
+    )
